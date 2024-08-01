@@ -1,10 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
-import { fs } from "fs";
+import fs from "fs";
 
 cloudinary.config({
-  cloud_name: "process.env.CLOUDINARY_CLOUD_NAME",
-  api_key: "process.env.CLOUDINARY_API_KEY",
-  api_secret: "process.env.CLOUDINARY_API_SECRET",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const uploadOnCloudinary = async (localFilePath) => {
@@ -16,8 +16,9 @@ const uploadOnCloudinary = async (localFilePath) => {
       resource_type: "auto",
     });
     // file has been uploaded successfully
-    console.log("File is uploaded on cloudinary", response.url);
-    console.log(response);
+    // console.log("File is uploaded on cloudinary", response.url);
+    // console.log(response);
+    fs.unlinkSync(localFilePath);
     return response;
   } catch (error) {
     // if file is not uploaded from our local server to cloudinary then also we will remove this mallicious file from our server

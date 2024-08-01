@@ -15,7 +15,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // check for user creation
   // return response (if user is created else return error)
 
-  const { username, fullname, email, password } = req.body;
+  const { username, fullName, email, password } = req.body;
   console.log("req.body: ", req.body);
   console.log("email: ", email);
   //   console.log("username: ", username);
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // we can use multiple if like this to verify other fields also or we can use the following method
 
   if (
-    [fullname, email, username, password].some((field) => field.trim() === "")
+    [fullName, email, username, password].some((field) => field.trim() === "")
   ) {
     throw new ApiError(400, "All fields are required");
   }
@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Please enter a valid email");
   }
 
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
   if (existedUser) {
@@ -47,9 +47,21 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // multer gives us access to req.files just like  express gives us req.body
 
-  const avatarLocalPath = req.files?.avatar[0]?.path();
+  const avatarLocalPath = req.files?.avatar[0]?.path;
   //   localPath becausse fill is still on our server it hasn't beem uploaded on cloudinary yet
-  const coverImageLocalPath = req.files?.coverImage[0]?.path();
+
+  //   const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+  // If we dont upload coverImage then in the above case we will get error so to handle that error
+  let coverImageLocalPath;
+
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImageLocalPath = req.files?.coverImage[0]?.path;
+  }
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
@@ -64,7 +76,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({
-    fullname,
+    fullName,
     avatar: avatar.url,
     coverImage: coverImage?.url || "",
     email,
