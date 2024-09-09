@@ -15,4 +15,4 @@ router.route("/toggle/c/:commentId").post(toggleCommentLike);
 router.route("/toggle/v/:tweetId").post(toggleTweetLike);
 router.route("/videos").post(getLikedVideos);
 
-export default Router;
+export default router;
