@@ -7,12 +7,11 @@ const videoSchema = new mongoose.Schema(
       type: String, //cloudnary url
       required: true,
     },
-    thumbnail: [
-      {
-        type: String, //cloudnaryUrl
-        required: true,
-      },
-    ],
+    thumbnail: {
+      type: String, //cloudnaryUrl
+      required: true,
+    },
+
     title: {
       type: String,
       required: true,
