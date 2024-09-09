@@ -27,7 +27,36 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+const deleteVideoFromCloudinary = async (publicUri) => {
+  try {
+    if (!publicUri) return null;
+    const response = await cloudinary.uploader.destroy(publicUri, {
+      resource_type: "video",
+    });
+    console.log("File deleted from Cloudinary:", publicUri);
+    return response;
+  } catch (error) {
+    console.error("Error while deleting video from Cloudinary", error);
+  }
+};
+
+const deleteThumbnailFromCloudinary = async (publicUri) => {
+  try {
+    if (!publicUri) return null;
+    const response = await cloudinary.uploader.destroy(publicUri, {
+      resource_type: "image",
+    });
+    console.log("File deleted from Cloudinary:", publicUri);
+    return response;
+  } catch (error) {
+    console.error("Error while deleting video from Cloudinary", error);
+  }
+};
+export {
+  uploadOnCloudinary,
+  deleteVideoFromCloudinary,
+  deleteThumbnailFromCloudinary,
+};
 
 // import { v2 as cloudinary } from 'cloudinary';
 
@@ -35,8 +64,8 @@ export { uploadOnCloudinary };
 
 //     // Configuration
 //     cloudinary.config({
-//         cloud_name: 'drvprr5tq',
-//         api_key: '371524792317469',
+//         cloud_name: 'cloud_name',
+//         api_key: '<your_api_key>',
 //         api_secret: '<your_api_secret>' // Click 'View Credentials' below to copy your API secret
 //     });
 
