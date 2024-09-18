@@ -9,9 +9,9 @@ const getVideoComments = asyncHandler(async (req, res) => {
   // TODO: get all video comments
   const { videoId } = req.params;
   const { page = 1, limit = 10 } = req.query;
-  const comments = await Comment.findById(videoId);
+  const comments = await Comment.find({ video: videoId });
   if (!comments) {
-    throw new ApiError(404, "No such video Exist");
+    throw new ApiError(404, "Video not Found");
   }
   let allComments;
   try {
@@ -35,8 +35,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         $lookup: {
           from: "likes",
-          foreignField: "likedBy",
           localField: "owner",
+          foreignField: "likedBy",
           as: "likes",
           pipeline: [
             {
@@ -50,7 +50,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         $addFields: {
           user_details: {
-            $arrayElemeAt: ["$details", "0"],
+            $arrayElemAt: ["$user_details", "0"],
           },
         },
       },
@@ -84,10 +84,10 @@ const addComment = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const isVideoValid = await Video.findById(videoId);
   if (content.length < 1 || content.trim() == "") {
-    throw new ApiError(401, "Comment Content cannot be empty");
+    throw new ApiError(400, "Comment Content cannot be empty");
   }
   if (!isVideoValid) {
-    throw new ApiError(401, "Invalid VideoId");
+    throw new ApiError(400, "Invalid VideoId");
   }
   const userId = console.log("req.user?._id = ", req.user?._id);
 
@@ -111,7 +111,7 @@ const updateComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
 
   if (content.length < 1 || content.trim() == "") {
-    throw new ApiError(401, "Comment Content cannot be empty");
+    throw new ApiError(400, "Comment Content cannot be empty");
   }
 
   const commentToUpdate = await Comment.findByIdAndUpdate(
