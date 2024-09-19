@@ -72,6 +72,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
   if (!allComments) {
     throw new ApiError(200, "No Comments on this video yet");
   }
+  // If there is any error then we need to remove AggregatePaginate
   const result = await Comment.aggregatePaginate(allComments, { page, limit });
   return res
     .status(200)
