@@ -115,14 +115,14 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   const thumbnailLocalPath = req?.files?.thumbnail[0]?.path;
   if (!thumbnailLocalPath) {
-    throw new ApiError(400, "Thumbanil is required");
+    throw new ApiError(400, "Thumbnail is required");
   }
 
   const videoFileLocalPath = req?.files?.videoFile[0]?.path;
   if (!videoFileLocalPath) {
     throw new ApiError(400, "Video file is required");
   }
-  // console.log("Files from Video upload (req.files) ", req.files);
+  console.log(req.files);
 
   let thumbnail;
   let videoFile;
@@ -187,24 +187,29 @@ const updateVideo = asyncHandler(async (req, res) => {
   // TODO: update video details like title description, thunbnail
   // get details from frontend
   // for the details like title and description are things are fair and simple just chnage the respective fields in the database
-  // for thumbanil/video for now we will just upload the new thumbanil/video on cloudinary and update the url but in future we will upload new and delete old files
+  // for thumbnail/video for now we will just upload the new thumbnail/video on cloudinary and update the url but in future we will upload new and delete old files
   const { title, description } = req.body;
   // using .every function to find if all the fields are empty
   // returns boolean based on if all elements pass the condition or not
 
-  const updateFields = {};
-  if (title) updateFields.title = title;
-  if (description) updateFields.description = description;
+  // const updateFields = {};
+  // if (title) updateFields.title = title;
+  // if (description) updateFields.description = description;
 
-  if (req.files?.thumbnail?.[0] || req.files?.videoFile?.[0]) {
+  let updatedThumbnail;
+  let updatedVideoFile;
+
+  console.log("req.files", req.files);
+  if (req.files?.thumbnail[0] || req.files?.videoFile[0]) {
     const video = await Video.findById(videoId);
+    // console.log("video =", video);
 
-    if (req.files?.thumbnail?.[0]) {
-      const thumbnailLocalPath = req.files?.thumbanil[0]?.path;
+    if (req.files?.thumbnail[0]) {
+      const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
       if (!thumbnailLocalPath) {
         throw new ApiError(400, "Thumbnail is missing please upload");
       }
-      const updatedThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+      updatedThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
       if (!updatedThumbnail.url) {
         throw new ApiError(400, "Error while uploading thumbnail");
@@ -214,14 +219,16 @@ const updateVideo = asyncHandler(async (req, res) => {
         await deleteThumbnailFromCloudinary(video.thumbnail);
       }
 
-      updateFields.thumbnail = updatedThumbnail.url;
+      // updateFields.thumbnail = updatedThumbnail.url;
     }
-    if (req.files?.videoFile?.[0]) {
+
+    // req?.files?.videoFile[0]?.path;
+    if (req.files?.videoFile[0]) {
       const videoFileLocalPath = req.files?.videoFile[0]?.path;
       if (!videoFileLocalPath) {
         throw new ApiError(400, "videoFile is missing please upload");
       }
-      const updatedVideoFile = uploadOnCloudinary(videoFileLocalPath);
+      updatedVideoFile = await uploadOnCloudinary(videoFileLocalPath);
 
       if (!updatedVideoFile.url) {
         throw new ApiError(400, "Error while uploading videoFile");
@@ -229,19 +236,29 @@ const updateVideo = asyncHandler(async (req, res) => {
       if (video.videoFile) {
         await deleteVideoFromCloudinary(video.videoFile);
       }
-      updateFields.videoFile = updatedVideoFile.url;
+      // updateFields.videoFile = updatedVideoFile.url;
     }
   }
+  const duration = updatedVideoFile.duration;
 
   const updatedVideo = await Video.findByIdAndUpdate(
-    req.video?._id,
+    videoId,
     {
-      $set: { updateFields },
+      $set: {
+        title,
+        description,
+        thumbnail: updatedThumbnail.url,
+        videoFile: updatedVideoFile.url,
+        duration,
+      },
     },
     {
       new: true,
     }
   );
+  if (!updatedVideo) {
+    throw new ApiError(500, "Error while updating the video");
+  }
   return res
     .status(200)
     .json(new ApiResponse(200, updatedVideo, "Video updated Successfully"));
@@ -258,13 +275,13 @@ const deleteVideo = asyncHandler(async (req, res) => {
   if (!videoToDelete) {
     throw new ApiError(409, "Video has been already deleted");
   }
-  if (videoToDelete.thumbanil)
-    await deleteThumbnailFromCloudinary(videoToDelete.thumbanil);
-  if (videoToDelete.thumbanil)
+  if (videoToDelete.thumbnail)
+    await deleteThumbnailFromCloudinary(videoToDelete.thumbnail);
+  if (videoToDelete.thumbnail)
     await deleteVideoFromCloudinary(videoToDelete.videoFile);
   return res
     .status(200)
-    .josn(new ApiResponse(200, {}, "Video has been deleted Successfully"));
+    .json(new ApiResponse(200, {}, "Video has been deleted Successfully"));
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
@@ -275,6 +292,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   // save the changes
 
   const video = await Video.findById(videoId);
+  // console.log("video =", video);
 
   if (!video) {
     throw new ApiError(404, "No video found with the given id");

@@ -33,7 +33,21 @@ router
   .route("/:videoId")
   .get(getVideoById)
   .delete(deleteVideo)
-  .patch(upload.single("thumbnail"), updateVideo);
+  // .patch(upload.single("thumbnail"), updateVideo);
+  // addining the function to update both the video and thumbnail
+  .patch(
+    upload.fields([
+      {
+        name: "videoFile",
+        maxCount: 1,
+      },
+      {
+        name: "thumbnail",
+        maxCount: 1,
+      },
+    ]),
+    updateVideo
+  );
 
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 
