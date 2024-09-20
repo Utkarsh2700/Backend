@@ -50,7 +50,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         $addFields: {
           user_details: {
-            $arrayElemAt: ["$user_details", "0"],
+            $arrayElemAt: ["$user_details", 0],
           },
         },
       },
@@ -73,10 +73,15 @@ const getVideoComments = asyncHandler(async (req, res) => {
     throw new ApiError(200, "No Comments on this video yet");
   }
   // If there is any error then we need to remove AggregatePaginate
-  const result = await Comment.aggregatePaginate(allComments, { page, limit });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, result, "All Comments fetched Successfully"));
+  // const result = await Comment.aggregatePaginate(allComments, { page, limit });
+  return (
+    res
+      .status(200)
+      // .json(new ApiResponse(200, result, "All Comments fetched Successfully"));
+      .json(
+        new ApiResponse(200, allComments, "All Comments fetched Successfully")
+      )
+  );
 });
 
 const addComment = asyncHandler(async (req, res) => {
@@ -90,8 +95,8 @@ const addComment = asyncHandler(async (req, res) => {
   if (!isVideoValid) {
     throw new ApiError(400, "Invalid VideoId");
   }
-  const userId = console.log("req.user?._id = ", req.user?._id);
-
+  const userId = req.user?._id;
+  console.log("req.user?._id = ", req.user?._id);
   const result = await Comment.create({
     content,
     video: videoId,

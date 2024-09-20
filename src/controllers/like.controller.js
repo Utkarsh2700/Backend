@@ -111,6 +111,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   // TODO: get all liked videos
   const userId = req.user._id;
   const user = await User.findById(userId);
+
   if (!user) {
     throw new ApiError(404, "User Not Found");
   }
@@ -119,7 +120,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
       $match: {
         $and: [
           { likedBy: new mongoose.Types.ObjectId(userId) },
-          { video: { $exits: true } },
+          { video: { $exists: true } },
         ],
       },
     },
@@ -150,7 +151,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
           {
             $addFields: {
               owner: {
-                $arrayElemAt: ["$owner", "0"],
+                $arrayElemAt: ["$owner", 0],
               },
             },
           },
@@ -160,7 +161,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     {
       $addFields: {
         liked_videos: {
-          $arrayElemAt: ["$liked_videos", "0"],
+          $arrayElemAt: ["$liked_videos", 0],
         },
       },
     },
@@ -174,7 +175,9 @@ const getLikedVideos = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         likedVideos,
-        "Videos liked by Logged In User fetched Successfully"
+        likedVideos.length === 0
+          ? "No Liked Videos By User"
+          : "Videos liked by Logged In User fetched Successfully"
       )
     );
 });
