@@ -45,7 +45,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
       )
     );
 });
-// controller to return subscriber list of a channel
+// controller to return subscriber count of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
   // TODO: return subscribers list
@@ -83,6 +83,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
   // TODO: return subscribed channels
   // check if the channel is valid
   // match the chnnels where subscriber matches channelId
+
   const isValidUser = await User.findById(channelId);
   if (!isValidUser) {
     throw new ApiError(404, "Subscriber Not Found");
@@ -90,7 +91,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
   const subscribedChannels = await Subscription.aggregate([
     {
       $match: {
-        subscriber: channelId,
+        subscriber: new mongoose.Types.ObjectId(channelId),
       },
     },
     {
