@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose from "mongoose";
 import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -6,14 +6,61 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import {
   uploadOnCloudinary,
   deleteVideoFromCloudinary,
-  deleteThumbnailFromCloudinary,
+  deleteImageFromCloudinary,
 } from "../utils/cloudinary.js";
+
+import { v4 as uuidv4 } from "uuid";
+import { exec } from "child_process";
+import path from "path";
+import fs from "fs";
+import { stderr, stdout } from "process";
+
+import { fileURLToPath } from "url";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
   //TODO : get all videos based on query, sort, pagination
   if (!query || query.trim() === "") {
-    throw new ApiError(404, "Please provide a valid query");
+    // throw new ApiError(404, "Please provide a valid query");// removed this as we need to show some videos to user who just logged in
+    const videos = await Video.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner_details",
+          pipeline: [
+            {
+              $project: {
+                username: 1,
+                fullName: 1,
+                avatar: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          owner_details: {
+            $arrayElemAt: ["$owner_details", 0],
+          },
+        },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: parseInt(limit),
+      },
+    ]);
+    if (!videos) {
+      throw new ApiError(500, "Error while fetching videos");
+    }
+    // const result = await Video.aggregatePaginate(videos, { page, limit });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, videos, "All Video Fetched Successfully"));
   }
   const sortCriteria = {};
   sortCriteria[sortBy] = sortType === "desc" ? -1 : 1;
@@ -85,10 +132,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
     return new ApiError(404, "No videos with such query parameters");
   }
 
-  const result = await Video.aggregatePaginate(videos, { page, limit });
+  // const result = await Video.aggregatePaginate(videos, { page, limit });
   return res
     .status(200)
-    .json(new ApiResponse(200, result, "All videos fetched Successfully"));
+    .json(new ApiResponse(200, videos, "All videos fetched Successfully"));
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -103,6 +150,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
   // create a video entry in db
   // check if the video has been uploaded sucessfully or not
   // return response
+
+  let thumbnail;
 
   if ([title, description].some((item) => item.trim === "")) {
     throw new ApiError(
@@ -124,47 +173,143 @@ const publishAVideo = asyncHandler(async (req, res) => {
   }
   console.log(req.files);
 
-  let thumbnail;
-  let videoFile;
+  // Get the current file path and directory
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
 
-  try {
-    thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
-    videoFile = await uploadOnCloudinary(videoFileLocalPath);
-  } catch (error) {
-    throw new ApiError(500, "Error uploading files to Cloudinary");
+  // generating unique ID for filenames
+  const videoId = uuidv4();
+  // const hlsOutputDir = `../public/temp/uploads/${videoId}`;
+  const hlsOutputDir = path.join(__dirname, `../public/temp/${videoId}`);
+  if (!fs.existsSync(hlsOutputDir)) {
+    fs.mkdirSync(hlsOutputDir, { recursive: true });
   }
 
-  console.log("thumbnail = ", thumbnail);
-  console.log("videoFile = ", videoFile);
+  // FFMPEG command to generate HLS(m3u8 and .ts file)
+  // const hlsFilePath = `${hlsOutputDir}/output.m3u8`;
+  const hlsFilePath = path.join(hlsOutputDir, "output.m3u8");
+  console.log("hlsFilePath", hlsFilePath);
+  // The following command is the meat part
 
-  if (!thumbnail || !videoFile) {
-    throw new ApiError(400, "Please upload thumbnail and video again");
-  }
+  const ffmpegCommand = `ffmpeg -i ${videoFileLocalPath} -codec:v libx264 -codec:a aac -hls_time 10 -hls_playlist_type vod -hls_segment_filename "${hlsOutputDir}/segment%03d.ts" -start_number 0 ${hlsFilePath}`;
 
-  const duration = videoFile?.duration;
-  console.log("duration = ", duration);
+  exec(ffmpegCommand, async (error, stderr, stdout) => {
+    if (error) {
+      throw new ApiError(500, `Error converting video to HLS: ${error}`);
+    }
+    // console.log(`stdout: ${stdout}`);
+    // console.log(`stderr: ${stderr}`);
 
-  const owner = req.user?._id;
-  console.log("owner = ", owner);
+    try {
+      // Uploading the HLS .m3u8 and .ts file to cloudinary
+      const hlsFiles = fs.readdirSync(hlsOutputDir);
 
-  const video = await Video.create({
-    title,
-    description,
-    thumbnail: thumbnail?.url,
-    videoFile: videoFile?.url,
-    duration,
-    isPublished: true,
-    owner,
+      const cloudinaryUploads = await Promise.all(
+        hlsFiles.map((file) =>
+          uploadOnCloudinary(path.join(hlsOutputDir, file))
+        )
+      );
+      const playlistFile = cloudinaryUploads.find((file) =>
+        file.url.endsWith(".m3u8")
+      );
+      const tsFiles = cloudinaryUploads.filter((file) =>
+        file.url.endsWith(".ts")
+      );
+      if (!playlistFile || tsFiles.length === 0) {
+        throw new ApiError(500, "Error while uploading files to Cloudinary");
+      }
+      // Upload thumbnail to Cloudinary
+      thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+      const owner = req.user?._id;
+
+      const video = await Video.create({
+        title,
+        description,
+        thumbnail: thumbnail.url,
+        videoFile: playlistFile.url,
+        duration: null,
+        isPublished: true,
+        owner,
+      });
+      const Video = await Video.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "UserDetails",
+            pipeline: [
+              {
+                $project: {
+                  username: 1,
+                  fullName: 1,
+                  avatar: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $addFields: {
+            UserDetails: {
+              $arrayElemAt: ["$UserDetails", 0],
+            },
+          },
+        },
+      ]);
+      return res
+        .status(201)
+        .json(new ApiResponse(201, Video, "Video Uploaded Successfully"));
+    } catch (uploadError) {
+      console.log("UploadError", uploadError);
+      throw new ApiError(
+        500,
+        `Error while uploading HLS files to cloudinary ${uploadError}`
+      );
+    }
   });
 
-  const uploadedVideo = await Video.findById(video._id);
-  if (!updateVideo) {
-    throw new ApiError(500, "Error while uploading the video");
-  }
+  // let videoFile;
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, uploadedVideo, "Video uploaded sucessfully"));
+  // try {
+  //   thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+  //   videoFile = await uploadOnCloudinary(videoFileLocalPath);
+  // } catch (error) {
+  //   throw new ApiError(500, "Error uploading files to Cloudinary");
+  // }
+
+  // console.log("thumbnail = ", thumbnail);
+  // console.log("videoFile = ", videoFile);
+
+  // if (!thumbnail || !videoFile) {
+  //   throw new ApiError(400, "Please upload thumbnail and video again");
+  // }
+
+  // const duration = videoFile?.duration;
+  // console.log("duration = ", duration);
+
+  // const owner = req.user?._id;
+  // console.log("owner = ", owner);
+
+  // const video = await Video.create({
+  //   title,
+  //   description,
+  //   thumbnail: thumbnail?.url,
+  //   videoFile: videoFile?.url,
+  //   duration,
+  //   isPublished: true,
+  //   owner,
+  // });
+
+  // const uploadedVideo = await Video.findById(video._id);
+  // if (!updateVideo) {
+  //   throw new ApiError(500, "Error while uploading the video");
+  // }
+
+  // return res
+  //   .status(201)
+  //   .json(new ApiResponse(201, uploadedVideo, "Video uploaded sucessfully"));
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
@@ -216,7 +361,7 @@ const updateVideo = asyncHandler(async (req, res) => {
       }
 
       if (video.thumbnail) {
-        await deleteThumbnailFromCloudinary(video.thumbnail);
+        await deleteImageFromCloudinary(video.thumbnail);
       }
 
       // updateFields.thumbnail = updatedThumbnail.url;
@@ -276,7 +421,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     throw new ApiError(409, "Video has been already deleted");
   }
   if (videoToDelete.thumbnail)
-    await deleteThumbnailFromCloudinary(videoToDelete.thumbnail);
+    await deleteImageFromCloudinary(videoToDelete.thumbnail);
   if (videoToDelete.thumbnail)
     await deleteVideoFromCloudinary(videoToDelete.videoFile);
   return res

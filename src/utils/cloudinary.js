@@ -40,7 +40,7 @@ const deleteVideoFromCloudinary = async (publicUri) => {
   }
 };
 
-const deleteThumbnailFromCloudinary = async (publicUri) => {
+const deleteImageFromCloudinary = async (publicUri) => {
   try {
     if (!publicUri) return null;
     const response = await cloudinary.uploader.destroy(publicUri, {
@@ -55,7 +55,7 @@ const deleteThumbnailFromCloudinary = async (publicUri) => {
 export {
   uploadOnCloudinary,
   deleteVideoFromCloudinary,
-  deleteThumbnailFromCloudinary,
+  deleteImageFromCloudinary,
 };
 
 // import { v2 as cloudinary } from 'cloudinary';

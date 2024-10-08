@@ -1,7 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteImageFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -275,20 +278,23 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateUserDetails = asyncHandler(async (req, res) => {
-  const { email, fullName } = req.body;
-  if (!email && !fullName) {
-    throw new ApiError(400, "Provide fields to be updated");
+  const { email, fullName, username } = req.body;
+
+  if ([email, fullName, username].every((field) => field === undefined)) {
+    throw new ApiError(400, "Atleast one value is required to be updated");
   }
+
   const updateFields = {};
-  if (email) updateFields.email = email;
-  if (fullName) updateFields.fullName = fullName;
+  if (email) updateFields.email = email.trim();
+  if (fullName) updateFields.fullName = fullName.trim();
+  if (username) updateFields.username = username.trim();
+
+  console.log("updateFields", updateFields);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set: {
-        updateFields,
-      },
+      $set: updateFields,
     },
     {
       new: true,
@@ -304,10 +310,15 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   console.log("request of updateUserAvatar (req.file?.path) : ", req);
   const avatarLocalPath = req.file?.path;
 
-  if (avatarLocalPath) {
+  if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is Missing");
   }
-  const avatar = uploadOnCloudinary(avatarLocalPath);
+  if (avatarLocalPath) {
+    console.log("deleting old avatar");
+
+    const deleteOldAvatar = await deleteImageFromCloudinary(req.user.avatar);
+  }
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   //   TODO: delete old image - assignment
 
@@ -332,6 +343,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Avatar Image Updated Successfully"));
 });
 const updateUserCoverImage = asyncHandler(async (req, res) => {
+  console.log("enter");
+
   console.log("request of updateUserCoverImage (req.file?.path) : ", req);
 
   const coverImageLocalPath = req.file?.path;
@@ -339,7 +352,14 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   if (!coverImageLocalPath) {
     throw new ApiError(400, "Cover Image file is Missing");
   }
-  const coverImage = uploadOnCloudinary(coverImageLocalPath);
+  console.log("image uploaded on local server");
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  console.log("image uploaded on cloudinary");
+
+  if (coverImageLocalPath) {
+    console.log("deleting old avatar");
+    await deleteImageFromCloudinary(req.user.coverImage);
+  }
 
   console.log("avatar uploadOnCloudinary (coverImage.url):", coverImage);
 
@@ -420,6 +440,14 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         email: 1,
       },
     },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "_id",
+        foreignField: "owner",
+        as: "allVideos",
+      },
+    },
   ]);
 
   // console.log("channel =", channel);
@@ -488,6 +516,27 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     );
 });
 
+const isUsernameUnique = asyncHandler(async (req, res) => {
+  const { username } = req.query;
+  console.log(typeof username);
+  console.log(username);
+
+  if (username && username.length < 4) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, {}, "Username must be atleast 4 characters"));
+  }
+  const existingUsername = await User.findOne({
+    username,
+  });
+  if (existingUsername) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Username already exists"));
+  }
+  return res.status(200).json(new ApiResponse(200, {}, "Username is unique"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -500,4 +549,5 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
+  isUsernameUnique,
 };
