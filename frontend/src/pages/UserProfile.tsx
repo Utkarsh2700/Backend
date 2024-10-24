@@ -42,11 +42,14 @@ const UserProfile = () => {
   const getUserChannelProfile = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${baseUrl}/users/c/${username}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/c/${username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setUserProfile(response.data.data);
 
       toast({
@@ -68,7 +71,9 @@ const UserProfile = () => {
   const subscribeChannel = async () => {
     try {
       const response = await axios.post(
-        `${baseUrl}/subscriptions/c/${userProfile?._id}?subscribed=${isSubs}`,
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/subscriptions/c/${
+          userProfile?._id
+        }?subscribed=${isSubs}`,
         {},
         {
           headers: {

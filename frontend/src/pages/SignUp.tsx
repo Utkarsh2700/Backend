@@ -51,7 +51,9 @@ const SignUp = () => {
         setUsernameMessage("");
         try {
           const response = await axios.get(
-            `${baseUrl}/users/checkUniqueUsername?username=${username}`
+            `${
+              import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
+            }/users/checkUniqueUsername?username=${username}`
           );
           // console.log("response", response);
 
@@ -82,11 +84,15 @@ const SignUp = () => {
     // console.log("formData", formData);
 
     try {
-      const response = await axios.post(`${baseUrl}/users/register`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/register`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       if (response.status == 201) {
         toast({
           title: "Success",

@@ -64,11 +64,16 @@ const Sidebar = () => {
   const getSubscribedChannels = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${baseUrl}/subscriptions/c/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
+        }/subscriptions/c/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.status === 200) {
         setSubscribedChannels(response.data.data);
       }

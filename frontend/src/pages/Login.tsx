@@ -43,11 +43,15 @@ const Login = () => {
     formData.append("username", data.username);
     formData.append("password", data.password);
     try {
-      const response = await axios.post(`${baseUrl}/users/login`, formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/login`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       console.log("response", response.data.data);
 
       if (response.status === 200) {

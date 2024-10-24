@@ -66,7 +66,7 @@ const BannerImage = () => {
 
     try {
       const response = await axios.patch(
-        `${baseUrl}/users/coverImage`,
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/coverImage`,
         formData,
         {
           headers: {
@@ -157,11 +157,15 @@ const AvatarUpdate = () => {
     formData.append("avatar", data.avatar);
 
     try {
-      const response = await axios.patch(`${baseUrl}/users/avatar`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.patch(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/avatar`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
@@ -255,11 +259,14 @@ const UserDetailsUpdate = () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const response = await axios.get(`${baseUrl}/users/current-user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/current-user`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const user = response.data.data;
       //   console.log("user", user);
 
@@ -331,7 +338,9 @@ const UserDetailsUpdate = () => {
 
     try {
       const response = await axios.patch(
-        `${baseUrl}/users/update-account`,
+        `${
+          import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
+        }/users/update-account`,
         updatedFields,
         {
           headers: {
@@ -469,7 +478,9 @@ const PasswordUpdate = () => {
 
     try {
       const response = await axios.post(
-        `${baseUrl}/users/change-password`,
+        `${
+          import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
+        }/users/change-password`,
         formData,
         {
           headers: {

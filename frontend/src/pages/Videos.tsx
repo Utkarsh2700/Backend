@@ -43,11 +43,14 @@ const Videos = () => {
   const getAllVideos = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`${baseUrl}/videos`, {
-        headers: {
-          Authorization: `Bearer ${token} `,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos`,
+        {
+          headers: {
+            Authorization: `Bearer ${token} `,
+          },
+        }
+      );
       //   console.log(response);
       setVideosFetched(response.data.data);
       if (response.status === 200) {

@@ -119,11 +119,14 @@ const Header = () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const response = await axios.get(`${baseUrl}/users/current-user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/current-user`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const user = response.data.data;
       // console.log("user", user);
 
@@ -144,7 +147,7 @@ const Header = () => {
   const logout = async () => {
     try {
       const response = await axios.post(
-        `${baseUrl}/users/logout`,
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/logout`,
         {},
         {
           headers: {
@@ -182,16 +185,19 @@ const Header = () => {
     async (searchQuery: string) => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`${baseUrl}/videos`, {
-          headers: {
-            Authorization: `Bearer ${token} `,
-          },
-          params: {
-            query: searchQuery,
-            page: 1,
-            limit: 10,
-          },
-        });
+        const response = await axios.get(
+          `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos`,
+          {
+            headers: {
+              Authorization: `Bearer ${token} `,
+            },
+            params: {
+              query: searchQuery,
+              page: 1,
+              limit: 10,
+            },
+          }
+        );
         setVideosFetched(response.data.data);
         if (response.status === 200) {
           toast({

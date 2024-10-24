@@ -58,11 +58,15 @@ const VideoUpload = () => {
     formData.append("videoFile", data.videoFile);
 
     try {
-      const response = await axios.post(`${baseUrl}/videos`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log("response", response);
 
       console.log("response.data", response.data);
