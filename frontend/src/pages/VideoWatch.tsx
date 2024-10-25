@@ -2,7 +2,7 @@ import Sidebar from "@/components/Sidebar";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import axios, { AxiosError } from "axios";
-import { baseUrl } from "@/constants";
+// import { baseUrl } from "@/constants";
 import { ApiResponse } from "@/types/ApiResponse";
 import { toast } from "@/hooks/use-toast";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -14,28 +14,41 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
+  // FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  // FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ThumbsUp } from "lucide-react";
+import { Loader2, ThumbsUp } from "lucide-react";
+import videojs from "video.js";
+import {
+  CommentResponse,
+  // AllComments,
+  // Comments,
+  // OwnerDetails,
+  User,
+  UserProfile,
+  VideoById,
+} from "@/types/types";
 
-type videoDetailsProps = {};
+// type videoDetailsProps = {};
 
 const VideoWatch = () => {
   // const { videoId } = useParams();
   const { username, videoId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [videoDetails, setVideoDetails] = useState();
-  const [userDetails, setUserDetails] = useState([]);
+  const [videoDetails, setVideoDetails] = useState<VideoById>();
+  const [userDetails, setUserDetails] = useState<User>();
   const [loading, setLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState();
+  const [userProfile, setUserProfile] = useState<UserProfile>();
   const [load, setLoad] = useState(false);
   const [isSubs, setIsSubs] = useState(false);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<CommentResponse>([]);
+  // data: [],
+  // user_details: {} as OwnerDetails,
+  // length: 0,
   const [commentLoad, setCommentLoad] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("token");
@@ -63,7 +76,7 @@ const VideoWatch = () => {
           },
         }
       );
-      // console.log(response);
+      console.log("get response by id", response.data.data);
 
       // if (response.status === 200) {
       setVideoDetails(response.data.data);
@@ -92,17 +105,21 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("UserDetails", response.data.data);
-      setUserDetails(response.data.data);
+      console.log("getUserDetails", response.data.data[0]);
+      setUserDetails(response.data.data[0]);
     } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorMessage = axiosError.response?.data.message;
       toast({
         title: "Failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
     setLoading(false);
   };
+
+  console.log("userDetails", userDetails);
 
   const getUserProfile = async () => {
     setLoad(true);
@@ -116,12 +133,14 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("UserProfile", response.data.data);
+      console.log("getUserProfile", response.data.data);
       setUserProfile(response.data.data);
     } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      const errorMessage = axiosError.response?.data.message;
       toast({
         title: "Failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -168,7 +187,7 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("All comments", response);
+      console.log("getVideoComments", response.data.data);
 
       if (response.status === 200) {
         setComments(response.data.data);
@@ -200,7 +219,9 @@ const VideoWatch = () => {
   const handleCommentSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     console.log("data", data);
-    const commentContent = {};
+    const commentContent = {
+      content: "",
+    };
     commentContent.content = data.comment;
 
     console.log("comment", commentContent);
@@ -248,7 +269,7 @@ const VideoWatch = () => {
       },
     ],
   };
-  console.log("videoDetails", videoDetails);
+  // console.log("videoDetails", videoDetails);
 
   const handlePlayerReady = (player) => {
     playerRef.current = player;
@@ -293,13 +314,13 @@ const VideoWatch = () => {
             <div className="nameImage flex text-white space-x-4 my-4">
               <img
                 className="w-10 h-10 rounded-full"
-                src={userDetails[0]?.avatar}
+                src={userDetails?.avatar}
                 alt=""
               />
               <div className="subs-col">
-                <h3>{userDetails[0]?.username}</h3>
+                <h3>{userDetails?.username}</h3>
                 <h3 className="text-gray-500 text-xs">
-                  {userDetails[0]?.subscribers_details} subscribers
+                  {userDetails?.subscribers_details} subscribers
                 </h3>
               </div>
               <Button
@@ -345,7 +366,7 @@ const VideoWatch = () => {
                       <FormControl className="flex items-center">
                         <span>
                           <img
-                            src={userDetails[0].avatar}
+                            src={userDetails?.avatar}
                             className="w-10 h-10 rounded-full mr-2"
                             alt=""
                           />
@@ -355,30 +376,36 @@ const VideoWatch = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Comment</Button>
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin w-4 h-4" />
+                ) : (
+                  <Button type="submit">Comment</Button>
+                )}
+                {/* <Button type="submit">Comment</Button> */}
               </form>
             </Form>
-            {comments.map((comment, index) => (
-              <div className="text-white flex items-center" key={comment._id}>
-                <div className="mr-2">
-                  <img
-                    src={comment.user_details.avatar}
-                    className="w-10 h-10 rounded-full"
-                  />
-                </div>
-                <div className="flex-col">
-                  <div className="flex space-x-2 items-center">
-                    <h3>@{comment.user_details.username}</h3>
-                    <p className="text-gray-500 text-xs">
-                      {formatTimeSincePosted(comment.createdAt)}
-                    </p>
+            {!commentLoad &&
+              comments?.map((comment) => (
+                <div className="text-white flex items-center" key={comment._id}>
+                  <div className="mr-2">
+                    <img
+                      src={comment.user_details.avatar}
+                      className="w-10 h-10 rounded-full"
+                    />
                   </div>
-                  <p>{comment.content}</p>
-                  {/* <p>{comment._id}</p> */}
-                  <ThumbsUp className="cursor-pointer" size={18} />
+                  <div className="flex-col">
+                    <div className="flex space-x-2 items-center">
+                      <h3>@{comment.user_details.username}</h3>
+                      <p className="text-gray-500 text-xs">
+                        {formatTimeSincePosted(comment.createdAt)}
+                      </p>
+                    </div>
+                    <p>{comment.content}</p>
+                    {/* <p>{comment._id}</p> */}
+                    <ThumbsUp className="cursor-pointer" size={18} />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
@@ -387,11 +414,3 @@ const VideoWatch = () => {
 };
 
 export default VideoWatch;
-
-// export const comments = () => {
-//   return (
-//     <div>
-//       <h1>All Comments</h1>
-//     </div>
-//   );
-// };

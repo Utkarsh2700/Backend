@@ -1,7 +1,6 @@
 import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { baseUrl } from "@/constants";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
 import axios, { AxiosError } from "axios";
@@ -144,9 +143,10 @@ const UserProfile = () => {
             <div className="flex items-center space-x-2">
               <h3 className="text-lg">{userProfile?.username}</h3>
               <h3>• {userProfile?.subscriberCount} subscribers</h3>
-              {userProfile?.allVideos.length > 0 && (
-                <h3>• {userProfile?.allVideos.length} Videos</h3>
-              )}
+              {userProfile?.allVideos !== undefined &&
+                userProfile?.allVideos.length > 0 && (
+                  <h3>• {userProfile?.allVideos.length} Videos</h3>
+                )}
             </div>
             <Button
               variant={"mybtn"}

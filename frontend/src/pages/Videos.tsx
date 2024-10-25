@@ -1,8 +1,8 @@
-import { baseUrl, categories } from "@/constants";
+import { categories } from "@/constants";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
 import axios, { AxiosError } from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 // import Header from "@/components/Header";
 import VideoItem from "@/components/VideoItem";
 import Sidebar from "@/components/Sidebar";
@@ -36,8 +36,8 @@ const Videos = () => {
   const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [videosFetched, setVideosFetched] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  // const videoRef = useRef<HTMLVideoElement>(null);
   const token = localStorage.getItem("token");
 
   const getAllVideos = async () => {

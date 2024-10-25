@@ -1,4 +1,5 @@
 import Sidebar from "@/components/Sidebar";
+import { Video } from "@/types/types";
 import { formatDistanceToNow } from "date-fns";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -38,7 +39,7 @@ const SearchPage = (props: Props) => {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const handleClick = (videoId, username) => {
+  const handleClick = (videoId: string, username: string) => {
     navigate(`/video/watch/${videoId}/${username}`);
   };
 
@@ -48,11 +49,11 @@ const SearchPage = (props: Props) => {
         <Sidebar />
       </div>
       <div className="right ml-4 space-y-6">
-        {searchResults.map((video) => (
+        {searchResults.map((video: Video) => (
           <div
             className="flex space-x-4"
             key={video._id}
-            onClick={() => handleClick(video._id, video.userDetails.username)}
+            onClick={() => handleClick(video._id, video.owner_details.username)}
           >
             <div className=" relative flex-shrink-0">
               <img
@@ -61,7 +62,8 @@ const SearchPage = (props: Props) => {
                 alt=""
               />
               <span className="absolute bottom-[7%] right-[7%] bg-black opacity-80 py-1 px-3 rounded-lg text-sm">
-                {formatVideoDuration(video.duration)}
+                {/* + operator used to convert num to str */}
+                {formatVideoDuration(+video.duration)}
               </span>
             </div>
             <div className="cursor-pointer">

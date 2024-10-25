@@ -12,7 +12,7 @@ const TRANSLATE_AMOUNT = 200;
 
 export function CategoryPills({
   categories,
-  selectedCategory,
+  // selectedCategory,
   onSelect,
 }: CategoryPillProps) {
   const [translate, setTranslate] = useState(0);
@@ -64,7 +64,7 @@ export function CategoryPills({
         <div className="absolute left-0 top-1/2 -translate-y-1/2 bg-gradient-to-r from-gray-900from-50% to-transparent w-24 h-full">
           <button
             // variant="ghost"
-            size="icon"
+            // size="icon"
             className="h-full aspect-square w-auto p-1.5"
             onClick={() => {
               setTranslate((translate) => {

@@ -1,6 +1,5 @@
 import { useEffect, useState, KeyboardEvent } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { baseUrl } from "@/constants";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 import { toast } from "@/hooks/use-toast";

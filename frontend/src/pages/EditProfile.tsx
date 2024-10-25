@@ -9,7 +9,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import axios, { AxiosError } from "axios";
-import { baseUrl } from "@/constants";
 import { ApiResponse } from "@/types/ApiResponse";
 import { toast } from "@/hooks/use-toast";
 import {

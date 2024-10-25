@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { videoUploadSchema } from "@/schemas/VideoUploadSchema";
 import axios, { AxiosError } from "axios";
-import { baseUrl } from "@/constants";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
 import {
