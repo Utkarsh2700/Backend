@@ -105,7 +105,7 @@ const Header = () => {
 
   const [userDetails, setUserDetails] = useState<User>();
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query] = useState("");
   const [videosFetched, setVideosFetched] = useState<Video[]>([]);
 
   const [showFullWidthSearch, setShowFullWidthSearch] = useState(false);
@@ -251,7 +251,8 @@ const Header = () => {
   };
 
   return (
-    token && (
+    token &&
+    !isLoading && (
       <div className="bg-black text-white flex items-center py-2 justify-between px-8 mr-4">
         <PageHeaderFirstSection hidden={showFullWidthSearch} />
         <div

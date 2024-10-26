@@ -93,9 +93,10 @@ const Videos = () => {
             />
           </div>
           <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
-            {videosFetched.map((video) => (
-              <VideoItem key={video._id} {...video} />
-            ))}
+            {!isLoading &&
+              videosFetched.map((video) => (
+                <VideoItem key={video._id} {...video} />
+              ))}
           </div>
         </div>
       </div>

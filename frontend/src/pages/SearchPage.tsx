@@ -14,6 +14,8 @@ const SearchPage = (props: Props) => {
   const navigate = useNavigate();
 
   console.log("searchResults", searchResults);
+  console.log("props", props);
+  console.log("query", query);
 
   //   function to show time since video is posted
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import {
@@ -20,12 +20,6 @@ import VideoWatch from "./pages/VideoWatch.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
 import AuthRoute from "./routes/AuthRoute.tsx";
 import ProtectedRoute from "./routes/ProtectedRoute.tsx";
-// import { AuthProvider } from "./contexts/AuthContext.tsx";
-// import ProtectedRoute from "./components/ProtectedRoute.tsx";
-// import AuthRoute from "./components/AuthRoute.tsx";
-
-// const token = localStorage.getItem("token");
-
 const router = createBrowserRouter(
   createRoutesFromElements([
     <Route path="/" element={<Routes />}>

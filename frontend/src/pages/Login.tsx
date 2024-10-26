@@ -3,13 +3,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
-
 import * as z from "zod";
 import { LoginSchema } from "@/schemas/LoginSchema";
 import { Button } from "../components/ui/button";
 import axios, { AxiosError } from "axios";
-import { baseUrl } from "@/constants";
-import { ApiResponse } from "@/types/ApiResponse";
 import {
   Form,
   FormControl,
@@ -20,7 +17,7 @@ import {
 } from "../components/ui/form";
 import { Input } from "../components/ui/input";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { ApiResponse } from "@/types/ApiResponse";
 
 const Login = () => {
   // zod implementation

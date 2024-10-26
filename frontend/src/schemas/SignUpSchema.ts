@@ -49,17 +49,21 @@ export const signUpSchema = z.object({
       message: "Please select an image file",
     })
     .refine((file) => file.size <= MAX_FILE_SIZE, {
-      message: `The image is too big. Please choose a smaller image than ${formatBytes}`,
+      message: `The image is too big. Please choose a smaller image than ${formatBytes(
+        MAX_FILE_SIZE
+      )}`,
     })
     .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), {
-      message: "Please upload a valid image file(JPEG< PNG< or WebP)",
+      message: "Please upload a valid image file(JPEG, PNG, or WebP)",
     }),
   coverImage: z
     .instanceof(File, {
       message: "Please select an image file",
     })
     .refine((file) => file.size <= MAX_FILE_SIZE, {
-      message: `The image is too big. Please choose a smaller image than ${formatBytes}`,
+      message: `The image is too big. Please choose a smaller image than ${formatBytes(
+        MAX_FILE_SIZE
+      )}`,
     })
     .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), {
       message: "Please upload a valid image file(JPEG< PNG< or WebP)",

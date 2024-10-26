@@ -43,8 +43,8 @@ const VideoUpload = () => {
     defaultValues: {
       title: "",
       description: "",
-      thumbnail: null,
-      videoFile: null,
+      thumbnail: undefined,
+      videoFile: undefined,
     },
   });
 
@@ -53,8 +53,12 @@ const VideoUpload = () => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);
-    formData.append("thumbnail", data.thumbnail);
-    formData.append("videoFile", data.videoFile);
+    if (data.thumbnail) {
+      formData.append("thumbnail", data.thumbnail);
+    }
+    if (data.videoFile) {
+      formData.append("videoFile", data.videoFile);
+    }
 
     try {
       const response = await axios.post(

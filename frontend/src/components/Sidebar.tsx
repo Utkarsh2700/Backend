@@ -29,7 +29,6 @@ import { Link } from "react-router-dom";
 import { useSidebarContext } from "@/contexts/SidebarContext";
 import { PageHeaderFirstSection } from "./Header";
 import axios, { AxiosError } from "axios";
-import { baseUrl } from "@/constants";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
 
@@ -176,16 +175,17 @@ const Sidebar = () => {
         </LargeSidebarSection>
         <hr className=" border-gray-800" />
         <LargeSidebarSection title="Subscriptions">
-          {subscribeChannels.map((subscription) => (
-            // <Link to={`/@/${subscription.user_details.username}`}>
-            <LargeSidebarItem
-              key={subscription._id}
-              IconOrImgUrl={subscription.user_details.avatar}
-              title={subscription.user_details.username}
-              url={`/@/${subscription.user_details.username}`}
-            />
-            // </Link>
-          ))}
+          {!isLoading &&
+            subscribeChannels.map((subscription) => (
+              // <Link to={`/@/${subscription.user_details.username}`}>
+              <LargeSidebarItem
+                key={subscription._id}
+                IconOrImgUrl={subscription.user_details.avatar}
+                title={subscription.user_details.username}
+                url={`/@/${subscription.user_details.username}`}
+              />
+              // </Link>
+            ))}
         </LargeSidebarSection>
         <hr className=" border-gray-800" />
         <LargeSidebarSection title="Explore">

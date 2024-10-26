@@ -54,9 +54,9 @@ const BannerImage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof CoverImageSchema>>({
     resolver: zodResolver(CoverImageSchema),
-    defaultValues: {
-      coverImage: null,
-    },
+    // defaultValues: {
+    //   coverImage: null,
+    // },
   });
   const onSubmit = async (data: z.infer<typeof CoverImageSchema>) => {
     setIsSubmitting(true);
@@ -146,9 +146,9 @@ const AvatarUpdate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof ImageUpdateSchema>>({
     resolver: zodResolver(ImageUpdateSchema),
-    defaultValues: {
-      avatar: null,
-    },
+    // defaultValues: {
+    //   avatar: null,
+    // },
   });
   const onSubmit = async (data: z.infer<typeof ImageUpdateSchema>) => {
     setIsSubmitting(true);
@@ -289,6 +289,9 @@ const UserDetailsUpdate = () => {
     }
     setIsLoading(false);
   };
+
+  console.table(userDetails);
+  console.log(isLoading);
 
   useEffect(() => {
     fetchUserDetaills();

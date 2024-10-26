@@ -38,19 +38,23 @@ export const videoUploadSchema = z.object({
       message: "Please select an image",
     })
     .refine((file) => file.size <= MAX_IMAGE_SIZE, {
-      message: `The image is too big.Please choose a smaller image than ${formatBytes}`,
+      message: `The image is too big.Please choose a smaller image than ${formatBytes(
+        MAX_IMAGE_SIZE
+      )}`,
     })
     .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), {
-      message: "Please Upload a Valid image file(JPEG< PNG< or WEBP)",
+      message: "Please Upload a Valid image file(JPEG, PNG, or WEBP)",
     }),
   videoFile: z
     .instanceof(File, {
       message: "Please select an image",
     })
     .refine((file) => file.size <= MAX_VIDEO_SIZE, {
-      message: `The image is too big.Please choose a smaller image than ${formatBytes}`,
+      message: `The image is too big.Please choose a smaller image than ${formatBytes(
+        MAX_VIDEO_SIZE
+      )}`,
     })
     .refine((file) => ACCEPTED_VIDEO_TYPES.includes(file.type), {
-      message: "Please Upload a Valid image file(JPEG< PNG< or WEBP)",
+      message: "Please Upload a Valid image file(JPEG, PNG, or WEBP)",
     }),
 });

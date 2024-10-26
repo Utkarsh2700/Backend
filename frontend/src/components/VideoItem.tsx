@@ -33,13 +33,10 @@ const VideoItem = ({
   videoFile,
   thumbnail,
   title,
-  description,
   duration,
   views,
   isPublished,
-  owner,
   createdAt,
-  updatedAt,
   owner_details,
 }: Video) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);

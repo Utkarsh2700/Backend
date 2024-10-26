@@ -7,7 +7,6 @@ import { useDebounceCallback } from "usehooks-ts";
 import { useToast } from "@/hooks/use-toast";
 import { signUpSchema } from "@/schemas/SignUpSchema";
 import axios, { AxiosError } from "axios";
-import { baseUrl } from "@/constants";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Form,
