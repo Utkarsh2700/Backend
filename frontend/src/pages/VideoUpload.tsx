@@ -43,8 +43,8 @@ const VideoUpload = () => {
     defaultValues: {
       title: "",
       description: "",
-      thumbnail: undefined,
-      videoFile: undefined,
+      thumbnail: null,
+      videoFile: null,
     },
   });
 
