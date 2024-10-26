@@ -11,7 +11,7 @@ import "video.js/dist/video-js.css";
 
 // : VideoPlayerProps
 
-export const VideoPlayer = (props) => {
+export const VideoPlayer = (props: any) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const { options, onReady } = props;
