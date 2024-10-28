@@ -203,6 +203,7 @@ const VideoWatch = () => {
         variant: "destructive",
       });
     }
+    setCommentLoad(false);
   };
 
   const formSchema = z.object({
@@ -298,7 +299,7 @@ const VideoWatch = () => {
     !isLoading &&
     !loading &&
     !load && (
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full pb-6">
         <div className="overflow-y-auto sticky top-0 h-screen scrollbar-hidden w-58">
           {/* VideoWatch */}
           <Sidebar />
@@ -388,7 +389,10 @@ const VideoWatch = () => {
             </Form>
             {!commentLoad &&
               comments?.map((comment) => (
-                <div className="text-white flex items-center" key={comment._id}>
+                <div
+                  className="text-white flex items-center space-y-4"
+                  key={comment._id}
+                >
                   <div className="mr-2">
                     <img
                       src={comment.user_details.avatar}
