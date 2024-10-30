@@ -54,11 +54,11 @@ const Login = () => {
 
       if (response.status === 200) {
         const token = response.data.data.accessToken;
-        const encryptedtoken = btoa(token);
+        const encryptedtoken = window.btoa(token);
         // console.log("response.data.data.user", response.data.data.user._id);
 
         const userId = response.data.data.user._id;
-        const encryptedUserId = btoa(userId);
+        const encryptedUserId = window.btoa(userId);
         // console.log("userId", userId);
 
         // login(token);

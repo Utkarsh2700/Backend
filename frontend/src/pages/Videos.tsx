@@ -41,7 +41,7 @@ const Videos = () => {
   // const videoRef = useRef<HTMLVideoElement>(null);
   // const token = localStorage.getItem("token");
   const encryptedtoken: string = localStorage.getItem("token") ?? "";
-  let token: string = atob(encryptedtoken);
+  let token: string = window.atob(encryptedtoken);
   // console.log("decryptedToken", token);
 
   const getAllVideos = async () => {

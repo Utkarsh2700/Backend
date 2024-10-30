@@ -22,7 +22,7 @@ api.interceptors.response.use(
         );
 
         const { accessToken } = response.data.data;
-        const encryptedToken = btoa(accessToken);
+        const encryptedToken = window.btoa(accessToken);
         localStorage.setItem("token", encryptedToken);
 
         // Update the orignal request headers with the new token

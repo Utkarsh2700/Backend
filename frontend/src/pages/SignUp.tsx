@@ -122,7 +122,7 @@ const SignUp = () => {
       <div className="w-full max-w-md p-8 space-y-8 bg-black text-white rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-5xl font-extrabold tracking-tight lg:text-7xl mb-6">
-            Join Tweettube
+            Join Streamly
           </h1>
           <p className="mb-4">Signup and start creating, influencing</p>
         </div>
@@ -253,7 +253,7 @@ const SignUp = () => {
         <div className="text-center mt-4">
           <p>
             Already a member?
-            <Link to={"/signin"} className="text-blue-800 hover:text-blue-500">
+            <Link to={"/login"} className="text-blue-800 hover:text-blue-500">
               Sign In{" "}
             </Link>
           </p>

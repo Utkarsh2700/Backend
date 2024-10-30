@@ -111,12 +111,7 @@ const Header = () => {
 
   const [showFullWidthSearch, setShowFullWidthSearch] = useState(false);
   const encryptedtoken = localStorage.getItem("token") ?? "";
-  let token: string = atob(encryptedtoken);
-  // console.log("decryptedToken", token);
-
-  // if (encryptedtoken) {
-  //   token = atob(encryptedtoken);
-  // }
+  let token: string = window.atob(encryptedtoken);
 
   const navigate = useNavigate();
 
