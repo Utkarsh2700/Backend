@@ -1,6 +1,6 @@
 import { useEffect, useState, KeyboardEvent } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -41,6 +41,7 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useSidebarContext } from "@/contexts/SidebarContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useDebounceCallback } from "usehooks-ts";
+import api from "@/utils/axiosInterceptor";
 // import { Button } from "./ui/button";
 
 interface OwnerDetails {
@@ -109,7 +110,13 @@ const Header = () => {
   const [videosFetched, setVideosFetched] = useState<Video[]>([]);
 
   const [showFullWidthSearch, setShowFullWidthSearch] = useState(false);
-  const token = localStorage.getItem("token");
+  const encryptedtoken = localStorage.getItem("token") ?? "";
+  let token: string = atob(encryptedtoken);
+  // console.log("decryptedToken", token);
+
+  // if (encryptedtoken) {
+  //   token = atob(encryptedtoken);
+  // }
 
   const navigate = useNavigate();
 
@@ -118,7 +125,7 @@ const Header = () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/current-user`,
         {
           headers: {
@@ -144,8 +151,9 @@ const Header = () => {
 
   // logout functionality
   const logout = async () => {
+    localStorage.removeItem("token");
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/logout`,
         {},
         {
@@ -158,7 +166,6 @@ const Header = () => {
         title: "Logout",
         description: response.data.message ?? "Logged out",
       });
-      localStorage.removeItem("token");
       navigate("/login");
     } catch (error) {
       console.error("Error while logging out at frontend", error);
@@ -184,7 +191,7 @@ const Header = () => {
     async (searchQuery: string) => {
       setIsLoading(true);
       try {
-        const response = await axios.get(
+        const response = await api.get(
           `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos`,
           {
             headers: {
@@ -231,7 +238,7 @@ const Header = () => {
   // Function to handle navigatioin to the search page
 
   const handleSearchNavigation = () => {
-    console.log("clicked");
+    // console.log("clicked");
 
     // if (query) {
     navigate("/search", {
@@ -243,7 +250,7 @@ const Header = () => {
   // Handle "Enter" key press
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    console.log("event", event);
+    // console.log("event", event);
 
     if (event.key === "Enter") {
       handleSearchNavigation();
@@ -449,7 +456,7 @@ export function PageHeaderFirstSection({
           className="w-8 h-8 fill-red-600 stroke-red-600 mr-2"
           size={32}
         />
-        <p className="font-semibold">Tweettube</p>
+        <p className="font-semibold">Streamly</p>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { videoUploadSchema } from "@/schemas/VideoUploadSchema";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
 import {
@@ -26,12 +26,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ImageUp, Loader2, UploadCloudIcon } from "lucide-react";
+import api from "@/utils/axiosInterceptor";
 
 const VideoUpload = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
+  const encryptedtoken: string = localStorage.getItem("token") ?? "";
+  let token: string = atob(encryptedtoken);
+  // console.log("decryptedToken", token);
 
   useEffect(() => {
     setIsOpen(true);
@@ -61,7 +65,7 @@ const VideoUpload = () => {
     }
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos`,
         formData,
         {
@@ -70,9 +74,9 @@ const VideoUpload = () => {
           },
         }
       );
-      console.log("response", response);
+      // console.log("response", response);
 
-      console.log("response.data", response.data);
+      // console.log("response.data", response.data);
 
       const videoUploaded = response.data;
       toast({

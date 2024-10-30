@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import * as z from "zod";
 import { LoginSchema } from "@/schemas/LoginSchema";
 import { Button } from "../components/ui/button";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import {
   Form,
   FormControl,
@@ -18,6 +18,7 @@ import {
 import { Input } from "../components/ui/input";
 import { Loader2 } from "lucide-react";
 import { ApiResponse } from "@/types/ApiResponse";
+import api from "@/utils/axiosInterceptor";
 
 const Login = () => {
   // zod implementation
@@ -40,7 +41,7 @@ const Login = () => {
     formData.append("username", data.username);
     formData.append("password", data.password);
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/login`,
         formData,
         {
@@ -49,13 +50,20 @@ const Login = () => {
           },
         }
       );
-      console.log("response", response.data.data);
+      // console.log("response", response.data.data);
 
       if (response.status === 200) {
         const token = response.data.data.accessToken;
+        const encryptedtoken = btoa(token);
+        // console.log("response.data.data.user", response.data.data.user._id);
+
+        const userId = response.data.data.user._id;
+        const encryptedUserId = btoa(userId);
+        // console.log("userId", userId);
+
         // login(token);
-        localStorage.setItem("token", token);
-        localStorage.setItem("userId", response.data.data.user._id);
+        localStorage.setItem("token", encryptedtoken);
+        localStorage.setItem("userId", encryptedUserId);
         toast({
           title: "Login Successful",
           description: response.data.message,

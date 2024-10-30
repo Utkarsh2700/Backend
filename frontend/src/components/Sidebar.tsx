@@ -28,9 +28,10 @@ import React, { ElementType, ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSidebarContext } from "@/contexts/SidebarContext";
 import { PageHeaderFirstSection } from "./Header";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
+import api from "@/utils/axiosInterceptor";
 
 type userDetails = {
   _id: string;
@@ -54,8 +55,16 @@ const Sidebar = () => {
   const [subscribeChannels, setSubscribedChannels] = useState<
     subscribeChannelsProps[]
   >([]);
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
+
+  const encryptedUserId: string = localStorage.getItem("userId") ?? "";
+  // console.log("encryptedUserId", encryptedUserId);
+  const userId: string = atob(encryptedUserId);
+  // console.log("decryptedUserId", userId);
+
+  // const token = localStorage.getItem("token");
+  const encryptedtoken: string = localStorage.getItem("token") ?? "";
+  let token: string = atob(encryptedtoken);
+  // console.log("decryptedToken", token);
 
   useEffect(() => {
     getSubscribedChannels();
@@ -63,7 +72,7 @@ const Sidebar = () => {
   const getSubscribedChannels = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${
           import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
         }/subscriptions/c/${userId}`,

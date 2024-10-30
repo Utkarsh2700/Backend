@@ -1,7 +1,7 @@
 import Sidebar from "@/components/Sidebar";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 // import { baseUrl } from "@/constants";
 import { ApiResponse } from "@/types/ApiResponse";
 import { toast } from "@/hooks/use-toast";
@@ -32,6 +32,7 @@ import {
   UserProfile,
   VideoById,
 } from "@/types/types";
+import api from "@/utils/axiosInterceptor";
 
 // type videoDetailsProps = {};
 
@@ -51,7 +52,10 @@ const VideoWatch = () => {
   // length: 0,
   const [commentLoad, setCommentLoad] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
+  const encryptedtoken: string = localStorage.getItem("token") ?? "";
+  let token: string = atob(encryptedtoken);
+  // console.log("decryptedToken", token);
   const playerRef = useRef(null);
   // const videoLink =
   //   "http://localhost:8000/public/temp/90592924-89d7-4688-8a2a-fc4e7902d5c3/output.m3u8";
@@ -68,7 +72,7 @@ const VideoWatch = () => {
 
   const getVideoById = async () => {
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos/${videoId}`,
         {
           headers: {
@@ -76,7 +80,7 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("get response by id", response.data.data);
+      // console.log("get response by id", response.data.data);
 
       // if (response.status === 200) {
       setVideoDetails(response.data.data);
@@ -97,7 +101,7 @@ const VideoWatch = () => {
     setLoading(true);
     if (!token) return;
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/dashboard/stats`,
         {
           headers: {
@@ -105,7 +109,7 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("getUserDetails", response.data.data[0]);
+      // console.log("getUserDetails", response.data.data[0]);
       setUserDetails(response.data.data[0]);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
@@ -119,13 +123,13 @@ const VideoWatch = () => {
     setLoading(false);
   };
 
-  console.log("userDetails", userDetails);
+  // console.log("userDetails", userDetails);
 
   const getUserProfile = async () => {
     setLoad(true);
     if (!token) return;
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/c/${username}`,
         {
           headers: {
@@ -133,7 +137,7 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("getUserProfile", response.data.data);
+      // console.log("getUserProfile", response.data.data);
       setUserProfile(response.data.data);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
@@ -149,7 +153,7 @@ const VideoWatch = () => {
 
   const subscribeChannel = async () => {
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `
         ${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/subscriptions/c/${
           userProfile?._id
@@ -162,7 +166,7 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("subscribeChannel", response.data);
+      // console.log("subscribeChannel", response.data);
 
       if (response.status === 200) {
         setIsSubs((prev) => !prev);
@@ -181,7 +185,7 @@ const VideoWatch = () => {
   const getVideoComments = async () => {
     setCommentLoad(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/comments/${videoId}`,
         {
           headers: {
@@ -189,7 +193,7 @@ const VideoWatch = () => {
           },
         }
       );
-      console.log("getVideoComments", response.data.data);
+      // console.log("getVideoComments", response.data.data);
 
       if (response.status === 200) {
         setComments(response.data.data);
@@ -221,18 +225,18 @@ const VideoWatch = () => {
 
   const handleCommentSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    console.log("data", data);
+    // console.log("data", data);
     const commentContent = {
       content: "",
     };
     commentContent.content = data.comment;
 
-    console.log("comment", commentContent);
+    // console.log("comment", commentContent);
 
     try {
       // const formData = new FormData();
       // formData.append("content", data.comment);
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/comments/${videoId}`,
         commentContent,
         {

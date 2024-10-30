@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
-import axios, { AxiosError } from "axios";
+import api from "@/utils/axiosInterceptor";
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -25,7 +26,10 @@ const UserProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubs, setIsSubs] = useState(false);
   let { username } = useParams();
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
+  const encryptedtoken: string = localStorage.getItem("token") ?? "";
+  let token: string = atob(encryptedtoken);
+  // console.log("decryptedToken", token);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,7 +45,7 @@ const UserProfile = () => {
   const getUserChannelProfile = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/c/${username}`,
         {
           headers: {
@@ -69,7 +73,7 @@ const UserProfile = () => {
   };
   const subscribeChannel = async () => {
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/subscriptions/c/${
           userProfile?._id
         }?subscribed=${isSubs}`,

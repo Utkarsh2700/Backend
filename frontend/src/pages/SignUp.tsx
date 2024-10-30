@@ -6,7 +6,7 @@ import * as z from "zod";
 import { useDebounceCallback } from "usehooks-ts";
 import { useToast } from "@/hooks/use-toast";
 import { signUpSchema } from "@/schemas/SignUpSchema";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Form,
@@ -19,6 +19,7 @@ import {
 import { Input } from "../components/ui/input";
 import { Loader2 } from "lucide-react";
 import { ApiResponse } from "@/types/ApiResponse";
+import api from "@/utils/axiosInterceptor";
 
 const SignUp = () => {
   const [username, setUsername] = useState("");
@@ -49,7 +50,7 @@ const SignUp = () => {
         setIsCheckingUserName(true);
         setUsernameMessage("");
         try {
-          const response = await axios.get(
+          const response = await api.get(
             `${
               import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
             }/users/checkUniqueUsername?username=${username}`
@@ -87,7 +88,7 @@ const SignUp = () => {
     // console.log("formData", formData);
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/register`,
         formData,
         {

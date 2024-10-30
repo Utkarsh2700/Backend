@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -24,8 +24,12 @@ import { Input } from "@/components/ui/input";
 import { ImageUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "@/components/Sidebar";
+import api from "@/utils/axiosInterceptor";
 
-const token = localStorage.getItem("token");
+// const token = localStorage.getItem("token");
+const encryptedtoken: string = localStorage.getItem("token") ?? "";
+let token: string = atob(encryptedtoken);
+// console.log("decryptedToken", token);
 
 const EditProfile = () => {
   return (
@@ -64,7 +68,7 @@ const BannerImage = () => {
     formData.append("coverImage", data.coverImage);
 
     try {
-      const response = await axios.patch(
+      const response = await api.patch(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/coverImage`,
         formData,
         {
@@ -156,7 +160,7 @@ const AvatarUpdate = () => {
     formData.append("avatar", data.avatar);
 
     try {
-      const response = await axios.patch(
+      const response = await api.patch(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/avatar`,
         formData,
         {
@@ -258,7 +262,7 @@ const UserDetailsUpdate = () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/users/current-user`,
         {
           headers: {
@@ -324,7 +328,7 @@ const UserDetailsUpdate = () => {
     // Get only changed fields
 
     const updatedFields = getChangedFields(data);
-    console.log("updatedFields", updatedFields);
+    // console.log("updatedFields", updatedFields);
 
     // If no fields have been updated then return
 
@@ -339,7 +343,7 @@ const UserDetailsUpdate = () => {
     }
 
     try {
-      const response = await axios.patch(
+      const response = await api.patch(
         `${
           import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
         }/users/update-account`,
@@ -351,7 +355,7 @@ const UserDetailsUpdate = () => {
           },
         }
       );
-      console.log("response", response.data);
+      // console.log("response", response.data);
       if (response.status === 200) {
         toast({
           title: "Success",
@@ -479,7 +483,7 @@ const PasswordUpdate = () => {
     formData.append("confPassword", data.confPassword);
 
     try {
-      const response = await axios.post(
+      const response = await api.post(
         `${
           import.meta.env.VITE_REACT_APP_BACKEND_BASEURL
         }/users/change-password`,

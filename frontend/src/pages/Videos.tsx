@@ -1,12 +1,13 @@
 import { categories } from "@/constants";
 import { toast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 // import Header from "@/components/Header";
 import VideoItem from "@/components/VideoItem";
 import Sidebar from "@/components/Sidebar";
 import { CategoryPills } from "@/components/CategoryPills";
+import api from "@/utils/axiosInterceptor";
 // import { SidebarProvider } from "@/contexts/SidebarContext";
 
 interface OwnerDetails {
@@ -38,12 +39,15 @@ const Videos = () => {
   const [isLoading, setIsLoading] = useState(false);
   // const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   // const videoRef = useRef<HTMLVideoElement>(null);
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
+  const encryptedtoken: string = localStorage.getItem("token") ?? "";
+  let token: string = atob(encryptedtoken);
+  // console.log("decryptedToken", token);
 
   const getAllVideos = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/videos`,
         {
           headers: {
